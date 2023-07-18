@@ -191,7 +191,7 @@ class Dictionary {
       const {
         data: { programs },
       } = await api.get(
-        `/programs.json?paging=false&fields=id,programStages[*]&filter=name:in:PSS Assessment`
+        `/programs.json?paging=false&fields=id,programStages[*]&filter=name:like:PSS Assessment`
       );
       const program = programs[0];
       this.program = program;
@@ -212,6 +212,7 @@ class Dictionary {
       });
       return data;
     } catch (error) {
+      error.response && console.log('Error response: ', error.response.data);
       await this.deleteDataElementGroup();
       throw new Error(`Error adding data elements to program`);
     }
