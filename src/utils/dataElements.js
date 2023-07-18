@@ -45,7 +45,7 @@ export const getInternationalBenchmarkValues = async () => {
 export const getAllDataElements = async () => {
   try {
     const { data } = await Api.get(
-      `dataElements?fields=id,name,code&paging=false`
+      `dataElements?fields=id,name,code,valueType,optionSet[id,options[id,name]]&paging=false`
     );
     return data.dataElements;
   } catch (error) {
@@ -67,7 +67,7 @@ export const getBenchmarkDataElements = async () => {
 export const getIndicatorElements = async indicatorCode => {
   try {
     const { data } = await Api.get(
-      `dataElements?filter=code:like:${indicatorCode}&fields=id,name,code,valueType&paging=false`
+      `dataElements?filter=code:like:${indicatorCode}&fields=id,name,code,valueType,optionSet&paging=false`
     );
 
     const dataElements = data.dataElements.filter(dataElement => {

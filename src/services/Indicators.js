@@ -3,7 +3,6 @@ import Api from '../config/api';
 import {
   getAllDataElements,
   getBenchmarkDataElements,
-  getIndicatorElements,
   getInternationalBenchmarkValues,
   matchIndicatorDataElements,
 } from '../utils/dataElements';

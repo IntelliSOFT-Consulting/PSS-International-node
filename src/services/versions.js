@@ -1,6 +1,30 @@
 import Version from '../models/versions';
+import Category from '../models/indicators';
+import Api from '../config/api';
 import Subscriber from '../models/subscribers';
 import { sendEmail } from './mail';
+import {
+  getAllDataElements,
+  getInternationalBenchmarkValues,
+  matchIndicatorDataElements,
+} from '../utils/dataElements';
+
+function sortIndicators(indicators) {
+  // Sort the indicators based on the version in descending order
+  indicators.sort((a, b) => b.version - a.version);
+
+  // Sort the indicators with the same code to follow each other
+  indicators.sort((a, b) => {
+    if (a.code === b.code) {
+      return 0;
+    }
+    return a.code?.replace('-latest', '') < b.code?.replace('-latest', '')
+      ? -1
+      : 1;
+  });
+
+  return indicators;
+}
 
 export const createVersion = async data => {
   try {
@@ -145,5 +169,91 @@ export const deleteVersion = async id => {
     return `Version ${version.number} deleted`;
   } catch (error) {
     throw new Error(`Error deleting version: ${error.message}`);
+  }
+};
+
+export const getPublishedInternationalIndicators = async () => {
+  try {
+    const currentVersion = await Version.findOne({
+      status: 'published',
+      isActive: true,
+    });
+
+    const previousVersion = await Version.findOne({
+      number: { $lt: currentVersion.number },
+      status: 'published',
+      isActive: false,
+    }).sort({ number: -1 });
+
+    const currentIndicators = currentVersion.indicators;
+    const previousIndicators = previousVersion
+      ? previousVersion.indicators
+      : [];
+    const categories = await Category.find({
+      'indicators.code': { $in: [...currentIndicators] },
+    })
+      .populate('systemComponent', 'name _id')
+      .sort({
+        name: 1,
+      });
+
+    const dataElements = await getAllDataElements();
+
+    const benchmarks = await getInternationalBenchmarkValues();
+
+    const categoryIndicators = categories.map(category => {
+      const filterPrevious = category.indicators
+        .filter(indicator => previousIndicators.includes(indicator.code))
+        .map(indicator => {
+          const de = matchIndicatorDataElements(indicator, dataElements);
+
+          const benchmark = benchmarks.find(
+            benchMark => benchMark.dataElementName === de?.code
+          );
+
+          return {
+            ...de,
+            version: previousVersion.number,
+            description: indicator.description,
+            isLatest: false,
+            internationalBenchmark: benchmark?.value,
+          };
+        });
+
+      const filterCurrent = category.indicators
+        .filter(indicator => {
+          return currentIndicators.includes(indicator.code);
+        })
+        .map(indicator => {
+          const de = matchIndicatorDataElements(indicator, dataElements);
+
+          const benchmark = benchmarks.find(
+            benchMark => benchMark.dataElementName === de?.code
+          );
+
+          return {
+            ...de,
+            code: `${de.code}-latest`,
+            version: currentVersion.number,
+            description: indicator.description,
+            isLatest: true,
+            internationalBenchmark: benchmark?.value,
+          };
+        });
+
+      return {
+        id: category._id,
+        systemComponent: category.systemComponent,
+        category: category.systemComponent?.name,
+        isActive: category.isActive,
+        indicators: sortIndicators([...filterPrevious, ...filterCurrent]),
+      };
+    });
+
+    return categoryIndicators;
+  } catch (error) {
+    throw new Error(
+      `Error getting published international indicators: ${error.message}`
+    );
   }
 };

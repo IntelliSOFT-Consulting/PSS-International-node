@@ -67,46 +67,6 @@ export const createDictionary = async data => {
   }
 };
 
-/*
-I want the dictionary to be formatted like this:
-{
-    "indicatorName": "Thiong'o",
-    "systemComponent": "64ae742714bdb09dc14a3370",
-    "indicatorCode": "THIO",
-    "dimension": "Procurement",
-    "definition": "fxdgcvhbjn",
-    "dataType": "NUMBER",
-    "purposeAndIssues": "gdvhawbfjkvndksbfd",
-    "preferredDataSources": "vneenur4",
-    "benchmark": "hfuehgf7",
-    "expectedFrequencyDataDissemination": "Yearly",
-    "indicatorReference": "gd63g",
-    "indicatorSource": "dhy3ghdy3",
-    "methodOfEstimation": "COUNT",
-    "assessmentQuestions": [
-        {
-            "name": "hdnwbjwdbe111",
-            "valueType": "NUMBER"
-        },
-        {
-            "name": "bongo222",
-            "valueType": "BOOLEAN"
-        }
-    ],
-    "createdBy": {
-        "id": "M5zQapPyTZI",
-        "code": "",
-        "name": "admin admin",
-        "username": "admin",
-        "displayName": "admin admin"
-    },
-    "formula": {
-        "format": "dLrUr8Depbr",
-        "numerator": "{hg745g431}",
-        "denominator": "{nvbdhvb32}"
-    }
-}
-*/
 export const getDictionary = async query => {
   try {
     const { name } = query;
@@ -125,13 +85,7 @@ export const getDictionary = async query => {
 
     // get the related data elements
     const dataElements = await getIndicatorElements(indicatorData.code);
-    // {
-    //   data: { dataElements },
-    // } = await api.get(
-    //   `dataElements?filter=code:like:${indicatorData.code}&fields=id,name,code,valueType,optionSet&paging=false`
-    // );
 
-    // get the indicator from dhis2
     const {
       data: { indicators },
     } = await api.get(
@@ -187,7 +141,7 @@ export const getDictionary = async query => {
 
 export const editDictionary = async data => {
   try {
-    const dictionary = EditDictionary(data);
+    const dictionary = new EditDictionary(data);
     await dictionary.edit();
     return dictionary;
   } catch (error) {

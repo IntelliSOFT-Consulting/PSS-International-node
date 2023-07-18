@@ -1,0 +1,19 @@
+version: '3.1'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: unless-stopped
+    volumes:
+      - ./data/mongo:/data/db
+
+  server:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 4000:4000
+    depends_on:
+      - mongo
+    env_file:
+      - .env

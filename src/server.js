@@ -9,7 +9,7 @@ import { sendEmail } from './services/mail';
 
 const app = express();
 const Port = process.env.PORT || 4000;
-const dbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/babel';
+const dbUri = process.env.MONGO_URI || 'mongodb://localhost:27017/babel';
 const corsOptions = {
   origin: '*',
   optionsSuccessStatus: 200,

@@ -258,8 +258,8 @@ class Dictionary {
       shortName: this.dictionary.indicatorCode,
       code: this.dictionary.indicatorCode,
       description: this.dictionary.definition,
-      numerator: this.dictionary.formula.numerator,
-      denominator: this.dictionary.formula.denominator,
+      numerator: this.formatFormula(this.dictionary.formula.numerator),
+      denominator: this.formatFormula(this.dictionary.formula.denominator),
       indicatorType: { id: this.dictionary.formula.format },
     };
     try {
@@ -417,6 +417,19 @@ class Dictionary {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  formatFormula = formula => {
+    const variableRegex = /\{([^}]+)\}/g;
+
+    const replacedFormula = formula?.replace(variableRegex, (match, name) => {
+      const index = this.createdDataElements?.find(
+        q => q.name?.trim() === name.trim()
+      );
+      return `#{${index.id.toString()}}`;
+    });
+
+    return replacedFormula;
   };
 }
 
