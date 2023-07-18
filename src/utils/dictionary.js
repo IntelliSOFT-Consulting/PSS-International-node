@@ -191,7 +191,7 @@ class Dictionary {
       const {
         data: { programs },
       } = await api.get(
-        `/programs.json?paging=false&fields=id,programStages[*]&filter=name:eq:PSS Assessments`
+        `/programs.json?paging=false&fields=id,programStages[*]&filter=name:in:PSS Assessment`
       );
       const program = programs[0];
       this.program = program;
